@@ -53,8 +53,8 @@ COPY ./configs /app/configs
 COPY ./internal/assets /app/internal/assets
 COPY ./assets /app/assets
 COPY ./web /app/web
-COPY ./pkg/bazi/data/lunar-new-year.json /app/pkg/bazi/data/
-COPY ./pkg/bazi/data/solar-term.json /app/pkg/bazi/data/
+# COPY ./pkg/bazi/data/lunar-new-year.json /app/pkg/bazi/data/
+# COPY ./pkg/bazi/data/solar-term.json /app/pkg/bazi/data/
 COPY ./upload /app/upload
 EXPOSE 8080 8443
 
