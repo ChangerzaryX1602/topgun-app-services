@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// build2
+// build3
 type Resources struct {
 	LogConfig      logger.Config
 	FastHTTPClient *fasthttp.Client
