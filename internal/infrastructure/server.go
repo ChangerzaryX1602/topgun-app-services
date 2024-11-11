@@ -41,18 +41,18 @@ func NewServer(version, buildTag, runEnv string) (server *Server, err error) {
 	}
 
 	// connect to DB
-	// mainDbConn, err := datasources.ConnectDb(datasources.DbConfig{
-	// 	DbDriver: "postgres",
-	// 	DbName:   viper.GetString("db.postgres.db_name"),
-	// 	Host:     viper.GetString("db.postgres.host"),
-	// 	Username: viper.GetString("db.postgres.username"),
-	// 	Password: viper.GetString("db.postgres.password"),
-	// 	Timezone: "Asia/Bangkok",
-	// 	Port:     viper.GetInt("db.postgres.port"),
-	// })
-	// if err != nil {
-	// 	return
-	// }
+	mainDbConn, err := datasources.ConnectDb(datasources.DbConfig{
+		DbDriver: "postgres",
+		DbName:   viper.GetString("db.postgres.db_name"),
+		Host:     viper.GetString("db.postgres.host"),
+		Username: viper.GetString("db.postgres.username"),
+		Password: viper.GetString("db.postgres.password"),
+		Timezone: "Asia/Bangkok",
+		Port:     viper.GetInt("db.postgres.port"),
+	})
+	if err != nil {
+		return
+	}
 
 	// server.RedisStorage, err = connectToRedis()
 	// if err != nil {
@@ -76,7 +76,7 @@ func NewServer(version, buildTag, runEnv string) (server *Server, err error) {
 	// }
 	// init app resources
 	// server.Resources = NewResources(fastHTTPClient, mainDbConn, nil, server.RedisStorage, jwtResources, minio)
-	server.Resources = NewResources(fastHTTPClient, nil, nil, nil, jwtResources, nil, nil)
+	server.Resources = NewResources(fastHTTPClient, mainDbConn, nil, nil, jwtResources, nil, nil)
 	// something that use resources place here
 
 	// pre config server

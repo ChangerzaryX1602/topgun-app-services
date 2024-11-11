@@ -23,11 +23,11 @@ db:
       max: 2
   postgres:
     sock: "/var/run/postgresql"
-    host: "localhost"
+    host: "185.84.161.188"
     port: 5432
-    username: ""
-    password: ""
-    db_name: ""
+    username: "postgres"
+    password: "topgun-kkucoe"
+    db_name: "postgres"
     conn:
       min: 1
       max: 2
