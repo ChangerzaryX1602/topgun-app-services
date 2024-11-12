@@ -2,12 +2,11 @@ package datasources
 
 import (
 	"fmt"
-	"top-gun-app-services/pkg/utils"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
-func MqttConnect(broker string, clientID string) (*mqtt.Client, error) {
+func MqttConnect(broker string, clientID string) (mqtt.Client, *mqtt.ClientOptions, error) {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(broker)
 	opts.SetClientID(clientID)
@@ -17,10 +16,10 @@ func MqttConnect(broker string, clientID string) (*mqtt.Client, error) {
 			fmt.Println(token.Error())
 		}
 	}
-	opts.SetDefaultPublishHandler(utils.MessagePubHandler)
+	// opts.SetDefaultPublishHandler(mqttService.DefaultMessagePubHandler)
 	client := mqtt.NewClient(opts)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		return nil, token.Error()
+		return nil, nil, token.Error()
 	}
-	return &client, nil
+	return client, opts, nil
 }

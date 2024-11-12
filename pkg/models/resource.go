@@ -24,7 +24,8 @@ type Resources struct {
 	JwtResources   *JwtResources
 	SessConfig     session.Config
 	Minio          *minio.Client
-	Mqtt           *mqtt.Client
+	Mqtt           mqtt.Client
+	MqttOption     *mqtt.ClientOptions
 }
 
 type JwtResources struct {

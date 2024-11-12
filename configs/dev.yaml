@@ -49,5 +49,5 @@ minio:
   access_key: ""
   secret_key: ""
 mqtt:
-  broker: ""
-  client_id: ""
+  broker: "mqtt://185.84.161.188:1883"
+  client_id: "mqttx_9098537e"

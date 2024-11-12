@@ -15,7 +15,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func NewResources(fasthttpClient *fasthttp.Client, mainDbConn *gorm.DB, logDbConn *mongo.Database, redisStorage *redis.Storage, jwtResources *models.JwtResources, minio *minio.Client, mqtt *mqtt.Client) models.Resources {
+func NewResources(fasthttpClient *fasthttp.Client, mainDbConn *gorm.DB, logDbConn *mongo.Database, redisStorage *redis.Storage, jwtResources *models.JwtResources, minio *minio.Client, mqtt mqtt.Client, mqttOption *mqtt.ClientOptions) models.Resources {
 	return models.Resources{
 		FastHTTPClient: fasthttpClient,
 		MainDbConn:     mainDbConn,
