@@ -18,11 +18,11 @@ type AuthHandler struct {
 }
 
 func NewAuthHandler(authRoute fiber.Router, auth AuthService, jwt models.JwtResources) {
-	handler := &AuthHandler{
-		authService: auth,
-		jwt:         jwt,
-	}
-	authRoute.Post("/", handler.Login())
+	// handler := &AuthHandler{
+	// 	authService: auth,
+	// 	jwt:         jwt,
+	// }
+	// authRoute.Post("/", handler.Login())
 }
 
 // @Summary Login

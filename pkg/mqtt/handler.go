@@ -21,7 +21,7 @@ func NewMQttHandler(router fiber.Router, mqttService MqttService, mqtt mqtt.Clie
 	mqttHandler.MqttSubscibeHandler(mqtt, mqttOption)
 }
 func (h mqttHandler) MqttSubscibeHandler(mqtt mqtt.Client, mqttOption *mqtt.ClientOptions) {
-	if token := mqtt.Subscribe("arduino/temperature", 0, h.mqttService.MessagePubHandler); token.Wait() && token.Error() != nil {
+	if token := mqtt.Subscribe("test/test", 0, h.mqttService.MessagePubHandler); token.Wait() && token.Error() != nil {
 		fmt.Printf("Error subscribing to topic: %v\n", token.Error())
 	}
 }
@@ -56,7 +56,7 @@ func (h mqttHandler) PostMqtt() fiber.Handler {
 				},
 			})
 		}
-		token := h.mqtt.Publish("arduino/temperature", 0, false, payload)
+		token := h.mqtt.Publish(req.Topic, 0, false, payload)
 		token.Wait()
 		if token.Error() != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(helpers.ResponseForm{

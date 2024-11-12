@@ -10,4 +10,5 @@ type MQTT struct {
 }
 type MQTTRequest struct {
 	Message string `json:"message"`
+	Topic   string `json:"topic"`
 }

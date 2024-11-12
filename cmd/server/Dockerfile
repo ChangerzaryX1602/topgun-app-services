@@ -13,17 +13,6 @@ RUN apt-get update && \
     apt-get -y install tini && \
     apt-get install -y ca-certificates && \
     apt-get -y clean
-
-# for CI/CD with private repo
-# RUN go env -w GOPRIVATE=github.com/zercle
-
-# use ssh instead of https
-# RUN git config --global url."git@github.com:".insteadOf "https://github.com"
-
-# use https with github token
-# RUN git config --global url."https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com".insteadOf "https://github.com"
-
-# pre-copy/cache go.mod for pre-downloading dependencies and only redownloading them in subsequent builds if they change
 COPY go.* ./
 RUN go mod download && go mod verify
 
@@ -53,8 +42,6 @@ COPY ./configs /app/configs
 COPY ./internal/assets /app/internal/assets
 COPY ./assets /app/assets
 COPY ./web /app/web
-# COPY ./pkg/bazi/data/lunar-new-year.json /app/pkg/bazi/data/
-# COPY ./pkg/bazi/data/solar-term.json /app/pkg/bazi/data/
 COPY ./upload /app/upload
 EXPOSE 8080 8443
 

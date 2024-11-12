@@ -4,12 +4,15 @@ import (
 	"fmt"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/spf13/viper"
 )
 
 func MqttConnect(broker string, clientID string) (mqtt.Client, *mqtt.ClientOptions, error) {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(broker)
 	opts.SetClientID(clientID)
+	opts.Username = viper.GetString("mqtt.username")
+	opts.Password = viper.GetString("mqtt.password")
 	opts.OnConnect = func(client mqtt.Client) {
 		fmt.Println("Connected to MQTT broker")
 		if token := client.Subscribe("arduino/temperature", 0, nil); token.Wait() && token.Error() != nil {

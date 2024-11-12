@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQTT WebSocket Client</title>
+</head>
+<body>
+    <h1>MQTT Topic Listener</h1>
+    <div>
+        <label for="topic">Enter Topic:</label>
+        <input type="text" id="topic" placeholder="Enter topic to subscribe">
+        <button onclick="startListening()">Subscribe</button>
+    </div>
+    <div id="messages" style="margin-top:20px;">
+        <h2>Received Messages:</h2>
+    </div>
+
+    <!-- Include MQTT.js -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+    <script>
+        // MQTT Configuration
+        const options = {
+            clientId: "mqttx_c1949714",
+            username: "changerzaryx",
+            password: "cn16022547",
+            protocol: "ws"
+        };
+
+        // Connect to the MQTT broker
+        const client = mqtt.connect("ws://185.84.161.188:9001/mqtt", options);
+
+        // Variable to keep track of the current topic
+        let currentTopic = "";
+
+        // Event: On successful connection
+        client.on("connect", () => {
+            console.log("Connected to MQTT broker");
+            alert("Connected to MQTT broker!");
+        });
+
+        // Event: On connection error
+        client.on("error", (err) => {
+            console.error("Connection error: ", err);
+            alert("Connection error! Check console for details.");
+            client.end();
+        });
+
+        // Event: On message received
+        client.on("message", (topic, message) => {
+            displayMessage(topic, message.toString());
+        });
+
+        // Subscribe to the topic entered by the user
+        function startListening() {
+            const topic = document.getElementById("topic").value;
+            
+            if (topic) {
+                // Clear previous messages
+                document.getElementById("messages").innerHTML = "<h2>Received Messages:</h2>";
+
+                // Unsubscribe from the current topic if it exists
+                if (currentTopic) {
+                    client.unsubscribe(currentTopic, (err) => {
+                        if (err) {
+                            console.error("Unsubscription error: ", err);
+                            alert("Error while unsubscribing from current topic.");
+                        } else {
+                            console.log(`Unsubscribed from topic: ${currentTopic}`);
+                        }
+                    });
+                }
+
+                // Subscribe to the new topic
+                client.subscribe(topic, (err) => {
+                    if (err) {
+                        console.error("Subscription error: ", err);
+                        alert("Subscription error! Check console for details.");
+                    } else {
+                        console.log(`Subscribed to topic: ${topic}`);
+                        alert(`Subscribed to topic: ${topic}`);
+                        currentTopic = topic; // Update current topic
+                    }
+                });
+            } else {
+                alert("Please enter a topic to subscribe.");
+            }
+        }
+
+        // Function to display received messages
+        function displayMessage(topic, message) {
+            const messageDisplay = document.createElement("p");
+            messageDisplay.textContent = `Topic: ${topic}, Message: ${message}`;
+            document.getElementById("messages").appendChild(messageDisplay);
+        }
+    </script>
+</body>
+</html>
