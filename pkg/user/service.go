@@ -1,4 +1,5 @@
 package user
+
 //build
 import (
 	"time"
@@ -33,20 +34,16 @@ func (s *userService) DeleteByID(id string) error {
 }
 func (s *userService) UpdateMe(id string, user User) error {
 	updatedData := User{
-		Name:      user.Name,
+		NameEn:    user.NameEn,
 		Email:     user.Email,
-		Birthdate: user.Birthdate,
-		Gender:    user.Gender,
 		UpdatedAt: time.Now(),
 	}
 	return s.userRepository.UpdateByID(id, updatedData)
 }
 func (s *userService) UpdateByID(id string, user User) error {
 	updatedData := User{
-		Name:      user.Name,
+		NameEn:    user.NameEn,
 		Email:     user.Email,
-		Birthdate: user.Birthdate,
-		Gender:    user.Gender,
 		UpdatedAt: time.Now(),
 	}
 	return s.userRepository.UpdateByID(id, updatedData)

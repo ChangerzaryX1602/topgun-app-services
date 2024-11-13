@@ -2,11 +2,9 @@ package auth
 
 import (
 	"fmt"
-	"time"
+	"top-gun-app-services/pkg/user"
 
-	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type authRepository struct {
@@ -18,26 +16,30 @@ func NewAuthRepository(resources *gorm.DB) AuthRepository {
 		Resource: resources,
 	}
 }
-func (r *authRepository) Login(email string, users User) (*User, error) {
-	if r.Resource == nil {
-		err := fiber.NewError(fiber.StatusServiceUnavailable, "Database server has gone away")
-		return nil, err
+func (r *authRepository) Register(user user.User) (*user.User, error) {
+	err := r.Resource.Create(&user)
+	if err.Error != nil {
+		return nil, err.Error
 	}
-	var existingUser User
-	err := r.Resource.Preload(clause.Associations).First(&existingUser, "email = ?", email).Error
-	if err != nil {
-		users.CreatedAt = time.Now()
-		err := r.Resource.Preload(clause.Associations).Create(&users).Error
-		if err != nil {
-			return nil, err
+
+	return &user, nil
+}
+
+func (r *authRepository) Login(user user.User) (*user.User, error) {
+	if user.Username != "" {
+		fmt.Println("username", user.Username)
+		err := r.Resource.First(&user, "username = ?", user.Username)
+		if err.Error != nil {
+			return nil, err.Error
 		}
-		return &users, err
 	}
-	users.UpdatedAt = time.Now()
-	err = r.Resource.Model(&existingUser).Preload(clause.Associations).Updates(&users).Error
-	if err != nil {
-		return nil, err
+	if user.Email != "" {
+		fmt.Println("email", user.Email)
+		err := r.Resource.First(&user, "email = ?", user.Email)
+		if err.Error != nil {
+			return nil, err.Error
+		}
 	}
-	fmt.Println("existingUser:\n", existingUser)
-	return &existingUser, nil
+
+	return &user, nil
 }

@@ -18,7 +18,7 @@ type mqttHandler struct {
 func NewMQttHandler(router fiber.Router, mqttService MqttService, mqtt mqtt.Client, mqttOption *mqtt.ClientOptions) {
 	mqttHandler := mqttHandler{mqttService: mqttService, mqtt: mqtt, mqttOption: mqttOption}
 	router.Post("/", mqttHandler.PostMqtt())
-	mqttHandler.MqttSubscibeHandler(mqtt, mqttOption)
+	// mqttHandler.MqttSubscibeHandler(mqtt, mqttOption)
 }
 func (h mqttHandler) MqttSubscibeHandler(mqtt mqtt.Client, mqttOption *mqtt.ClientOptions) {
 	if token := mqtt.Subscribe("test/test", 0, h.mqttService.MessagePubHandler); token.Wait() && token.Error() != nil {

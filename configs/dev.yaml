@@ -53,3 +53,6 @@ mqtt:
   client_id: "mqttx_be33d6c6"
   username: "changerzaryx"
   password: "cn16022547"
+workshop:
+  ws: "ws://technest.ddns.net:8001/ws"
+  key: "6807e4259a8a69f3f352cfc2fae2117f"

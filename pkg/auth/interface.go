@@ -1,9 +1,13 @@
 package auth
 
+import "top-gun-app-services/pkg/user"
+
 type AuthRepository interface {
-	Login(string, User) (*User, error)
+	Login(user.User) (*user.User, error)
+	Register(user.User) (*user.User, error)
 }
 
 type AuthService interface {
-	Login(string) (*AuthResponse, error)
+	Register(user.User) (*UUID, error)
+	Login(LoginBody) (*LoginBody, error)
 }

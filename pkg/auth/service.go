@@ -1,15 +1,12 @@
 package auth
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"net/url"
+	"strings"
+	"time"
+	"top-gun-app-services/pkg/user"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/spf13/viper"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type authService struct {
@@ -21,108 +18,54 @@ func NewAuthService(repo AuthRepository) AuthService {
 		authRepository: repo,
 	}
 }
-func GetUserDetails(accessToken string) (map[string]interface{}, error) {
-	userURL := fmt.Sprintf(viper.GetString("oauth.host") + "/verify")
-	bodyParams := url.Values{
-		"id_token":  {accessToken},
-		"client_id": {viper.GetString("oauth.client_id")},
+func (s *authService) Register(req user.User) (*UUID, error) {
+	password, err := bcrypt.GenerateFromPassword([]byte(req.Password), 10)
+	if req.Username == "" || req.Password == "" || req.Email == "" {
+		return nil, fiber.NewError(fiber.StatusBadRequest, "Invalid input")
 	}
-	req, err := http.NewRequest("POST", userURL, bytes.NewBufferString(bodyParams.Encode()))
-	if err != nil {
-		return nil, fiber.NewError(fiber.StatusInternalServerError, err.Error())
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	client := http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fiber.NewError(fiber.StatusInternalServerError, err.Error())
-	}
-	defer resp.Body.Close()
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fiber.NewError(fiber.StatusInternalServerError, err.Error())
-	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, fiber.NewError(fiber.StatusInternalServerError, "Error getting access token")
-	}
-	var response map[string]interface{}
-	err = json.Unmarshal(respBody, &response)
-	if err != nil {
-		return nil, fiber.NewError(fiber.StatusInternalServerError, err.Error())
-	}
-	fmt.Println("response:\n", response)
-	return response, nil
-}
-func GetAccessToken(code string) (string, error) {
-	tokenURL := viper.GetString("oauth.host") + "/token"
-	bodyParams := url.Values{
-		"grant_type":    {"authorization_code"},
-		"client_id":     {viper.GetString("oauth.client_id")},
-		"client_secret": {viper.GetString("oauth.client_secret")},
-		"code":          {code},
-		"redirect_uri":  {viper.GetString("oauth.redirect_uri")},
-	}
-	req, err := http.NewRequest("POST", tokenURL, bytes.NewBufferString(bodyParams.Encode()))
-	if err != nil {
-		return "", fiber.NewError(fiber.StatusInternalServerError, err.Error())
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	client := http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fiber.NewError(fiber.StatusInternalServerError, err.Error())
-	}
-	defer resp.Body.Close()
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fiber.NewError(fiber.StatusInternalServerError, err.Error())
-	}
-	// if resp.StatusCode != http.StatusOK {
-	// 	return "", fiber.NewError(fiber.StatusInternalServerError, "Error getting access token")
-	// }
-	var response map[string]interface{}
-	err = json.Unmarshal(respBody, &response)
-	if err != nil {
-		return "", fiber.NewError(fiber.StatusInternalServerError, err.Error())
-	}
-	fmt.Println("response:\n", response)
-	accessToken, ok := response["id_token"].(string)
-	if !ok {
-		return "", fiber.NewError(fiber.StatusInternalServerError, "Access token not found in the response")
-	}
-	fmt.Println("accessToken:\n", accessToken)
-	return accessToken, nil
-}
 
-func (s *authService) Login(code string) (*AuthResponse, error) {
-	accessToken, err := GetAccessToken(code)
 	if err != nil {
-		fmt.Println("error get access token", err)
-		return nil, fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to hash password")
 	}
-	userDetails, err := GetUserDetails(accessToken)
-	if err != nil {
-		return nil, fiber.NewError(fiber.StatusInternalServerError, err.Error())
-	}
-	fmt.Println("userDetails:\n", userDetails)
 
-	users := User{
-		Email:    userDetails["email"].(string),
-		Username: userDetails["name"].(string),
-		Picture:  userDetails["picture"].(string),
-		Sub:      userDetails["sub"].(string),
+	user := user.User{
+		NameEn:    req.NameEn,
+		Username:  req.Username,
+		Password:  string(password),
+		Email:     req.Email,
+		Language:  "th",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
-	id, err := s.authRepository.Login(users.Email, users)
+
+	newUser, err := s.authRepository.Register(user)
 	if err != nil {
-		return nil, fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to register user")
 	}
-	AuthResponse := AuthResponse{
-		ID:       id.ID,
-		Email:    users.Email,
-		Username: users.Username,
-		Picture:  users.Picture,
-		Sub:      users.Sub,
+
+	userResponse := UUID{
+		UUID: newUser.ID,
 	}
-	fmt.Println("AuthResponse:\n", AuthResponse)
-	return &AuthResponse, nil
+	return &userResponse, nil
+}
+func (s *authService) Login(req LoginBody) (*LoginBody, error) {
+	user := user.User{
+		Password: req.Password,
+	}
+	if strings.Contains(req.Identifier, "@") {
+		user.Email = req.Identifier
+	} else {
+		user.Username = req.Identifier
+	}
+
+	loginUser, err := s.authRepository.Login(user)
+	if err != nil {
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to login")
+	}
+
+	allUserResponse := LoginBody{
+		UUID:     loginUser.ID,
+		Password: loginUser.Password,
+	}
+	return &allUserResponse, nil
 }
