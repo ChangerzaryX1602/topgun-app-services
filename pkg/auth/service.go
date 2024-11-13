@@ -6,6 +6,7 @@ import (
 	"top-gun-app-services/pkg/user"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -29,6 +30,7 @@ func (s *authService) Register(req user.User) (*UUID, error) {
 	}
 
 	user := user.User{
+		ID:        uuid.New(),
 		NameEn:    req.NameEn,
 		Username:  req.Username,
 		Password:  string(password),
