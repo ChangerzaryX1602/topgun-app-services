@@ -11,7 +11,6 @@ import (
 	"top-gun-app-services/pkg/workshop"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/spf13/viper"
 	"gorm.io/gorm"
 )
 
@@ -40,9 +39,9 @@ func (s *Server) SetupRoutes(app *fiber.App) {
 	auth.NewAuthHandler(app.Group("/api/v1/auth"), authUsecase, *s.JwtResources, router)
 	mqtt.NewMQttHandler(app.Group("/api/v1/mqtt"), mqttUsecase, s.Mqtt, s.MqttOption)
 	workshop.NewWorkshopHandler(app.Group("/api/v1/machine"), workshopUsecase, router)
-	wsURL := viper.GetString("workshop.ws")
-	apiKey := viper.GetString("workshop.key")
-	workshopUsecase.ConnectWebSocket(wsURL, apiKey)
+	// wsURL := viper.GetString("workshop.ws")
+	// apiKey := viper.GetString("workshop.key")
+	// workshopUsecase.ConnectWebSocket(wsURL, apiKey)
 	// Prepare a fallback route to always serve the 'index.html', had there not be any matching routes.
 	app.Static("*", "./web/build/index.html")
 }
