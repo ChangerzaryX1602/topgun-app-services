@@ -9,6 +9,7 @@ import (
 	"top-gun-app-services/pkg/models"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type workshopRepository struct {
@@ -59,7 +60,7 @@ func (r workshopRepository) ProcessMessage(message []byte) {
 }
 func (r workshopRepository) CreateMachine(data RawData) (RawData, error) {
 	data.CreatedAt = time.Now()
-	err := r.db.Create(&data).Error
+	err := r.db.Preload(clause.Associations).Create(&data).Error
 	if err != nil {
 		return RawData{}, err
 	}
@@ -67,7 +68,7 @@ func (r workshopRepository) CreateMachine(data RawData) (RawData, error) {
 }
 func (r workshopRepository) GetMachines(paginate models.Paginate) ([]RawData, error) {
 	var machines []RawData
-	err := r.db.Limit(paginate.Limit).Offset(paginate.Offset).Find(&machines).Error
+	err := r.db.Preload(clause.Associations).Limit(paginate.Limit).Offset(paginate.Offset).Find(&machines).Error
 	if err != nil {
 		return nil, err
 	}
@@ -75,14 +76,14 @@ func (r workshopRepository) GetMachines(paginate models.Paginate) ([]RawData, er
 }
 func (r workshopRepository) GetMachine(id string) (RawData, error) {
 	var machine RawData
-	err := r.db.Model(RawData{}).Where("id = ?", id).First(&machine).Error
+	err := r.db.Model(RawData{}).Preload(clause.Associations).Where("id = ?", id).First(&machine).Error
 	if err != nil {
 		return RawData{}, err
 	}
 	return machine, nil
 }
 func (r workshopRepository) UpdateMachine(id string, data RawData) (RawData, error) {
-	err := r.db.Model(&RawData{}).Where("id = ?", id).Updates(data).Error
+	err := r.db.Model(&RawData{}).Preload(clause.Associations).Where("id = ?", id).Updates(data).Error
 	if err != nil {
 		return RawData{}, err
 	}
