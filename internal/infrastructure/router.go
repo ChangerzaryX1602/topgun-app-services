@@ -36,7 +36,7 @@ func (s *Server) SetupRoutes(app *fiber.App) {
 	mqttUsecase := mqtt.NewMQttService(mqttRepository)
 	workshopUsecase := workshop.NewWorkshopService(workshopRepository)
 	user.NewUserHandler(app.Group("/api/v1/users"), userUsecase, router)
-	auth.NewAuthHandler(app.Group("/api/v1/auth"), authUsecase, *s.JwtResources)
+	auth.NewAuthHandler(app.Group("/api/v1/auth"), authUsecase, *s.JwtResources, router)
 	mqtt.NewMQttHandler(app.Group("/api/v1/mqtt"), mqttUsecase, s.Mqtt, s.MqttOption)
 	workshop.NewWorkshopHandler(app.Group("/api/v1/machine"), workshopUsecase, router)
 	// wsURL := viper.GetString("workshop.ws")

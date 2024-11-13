@@ -10,6 +10,7 @@ import (
 	helpers "github.com/zercle/gofiber-helpers"
 	"golang.org/x/crypto/bcrypt"
 
+	"top-gun-app-services/internal/handlers"
 	"top-gun-app-services/pkg/models"
 	"top-gun-app-services/pkg/user"
 )
@@ -17,15 +18,45 @@ import (
 type AuthHandler struct {
 	authService AuthService
 	jwt         models.JwtResources
+	auth        *handlers.RouterResources
 }
 
-func NewAuthHandler(authRoute fiber.Router, auth AuthService, jwt models.JwtResources) {
+func NewAuthHandler(authRoute fiber.Router, auth AuthService, jwt models.JwtResources, route *handlers.RouterResources) {
 	handler := &AuthHandler{
 		authService: auth,
 		jwt:         jwt,
+		auth:        route,
 	}
 	authRoute.Post("/", handler.Login())
 	authRoute.Post("/register", handler.Register())
+	authRoute.Get("/refresh", handler.auth.ReqAuthHandler(0), handler.Refresh())
+}
+func (h *AuthHandler) Refresh() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		token := jwt.NewWithClaims(h.jwt.JwtSigningMethod, &jwt.RegisteredClaims{})
+		claims := token.Claims.(*jwt.RegisteredClaims)
+		claims.Subject = c.Locals("user_id").(string)
+		claims.Issuer = c.Hostname()
+		claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Minute * 1))
+		signToken, err := token.SignedString(h.jwt.JwtSignKey)
+		if err != nil {
+			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
+				"Error": "Failed to generate token",
+			})
+		}
+		// refresh token
+		refreshToken := jwt.NewWithClaims(h.jwt.JwtSigningMethod, &jwt.RegisteredClaims{})
+		refreshClaims := refreshToken.Claims.(*jwt.RegisteredClaims)
+		refreshClaims.Subject = c.Locals("user_id").(string)
+		refreshClaims.Issuer = c.Hostname()
+		refreshSignToken, err := refreshToken.SignedString(h.jwt.JwtSignKey)
+		if err != nil {
+			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
+				"Error": "Failed to generate refresh token",
+			})
+		}
+		return c.JSON(fiber.Map{"access_token": signToken, "refresh_token": refreshSignToken})
+	}
 }
 
 // @Summary Login
@@ -74,8 +105,24 @@ func (h *AuthHandler) Login() fiber.Handler {
 		claims := token.Claims.(*jwt.RegisteredClaims)
 		claims.Subject = response.UUID.String()
 		claims.Issuer = c.Hostname()
-		claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Hour * 24))
+		claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Minute * 1))
 		signToken, err := token.SignedString(h.jwt.JwtSignKey)
+		if err != nil {
+			responseForm.Errors = []helpers.ResponseError{
+				{
+					Code:    http.StatusUnauthorized,
+					Source:  helpers.WhereAmI(),
+					Message: err.Error(),
+				},
+			}
+			return c.Status(http.StatusUnauthorized).JSON(responseForm)
+		}
+		// refresh token
+		refreshToken := jwt.NewWithClaims(h.jwt.JwtSigningMethod, &jwt.RegisteredClaims{})
+		refreshClaims := refreshToken.Claims.(*jwt.RegisteredClaims)
+		refreshClaims.Subject = response.UUID.String()
+		refreshClaims.Issuer = c.Hostname()
+		refreshSignToken, err := refreshToken.SignedString(h.jwt.JwtSignKey)
 		if err != nil {
 			responseForm.Errors = []helpers.ResponseError{
 				{
@@ -92,7 +139,7 @@ func (h *AuthHandler) Login() fiber.Handler {
 		fmt.Println("loginLog:", loginLog)
 
 		// Return the generated token to the client
-		return c.JSON(fiber.Map{"token": signToken})
+		return c.JSON(fiber.Map{"access_token": signToken, "refresh_token": refreshSignToken})
 	}
 }
 
