@@ -31,8 +31,19 @@ func NewAuthHandler(authRoute fiber.Router, auth AuthService, jwt models.JwtReso
 	authRoute.Post("/register", handler.Register())
 	authRoute.Get("/refresh", handler.auth.ReqAuthHandler(0), handler.Refresh())
 }
+
+var BlackListToken []string
+
 func (h *AuthHandler) Refresh() fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		//if token is in blacklist then return 401
+		for _, v := range BlackListToken {
+			if c.Get(fiber.HeaderAuthorization) == v {
+				return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
+					"Error": "Token is used",
+				})
+			}
+		}
 		token := jwt.NewWithClaims(h.jwt.JwtSigningMethod, &jwt.RegisteredClaims{})
 		claims := token.Claims.(*jwt.RegisteredClaims)
 		claims.Subject = c.Locals("user_id").(string)
@@ -55,6 +66,7 @@ func (h *AuthHandler) Refresh() fiber.Handler {
 				"Error": "Failed to generate refresh token",
 			})
 		}
+		BlackListToken = append(BlackListToken, c.Get(fiber.HeaderAuthorization))
 		return c.JSON(fiber.Map{"access_token": signToken, "refresh_token": refreshSignToken})
 	}
 }
