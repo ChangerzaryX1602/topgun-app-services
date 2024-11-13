@@ -25,6 +25,7 @@ func NewAuthHandler(authRoute fiber.Router, auth AuthService, jwt models.JwtReso
 		jwt:         jwt,
 	}
 	authRoute.Post("/", handler.Login())
+	authRoute.Post("/register", handler.Register())
 }
 
 // @Summary Login
