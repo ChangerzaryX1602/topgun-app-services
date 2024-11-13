@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"time"
 	"top-gun-app-services/pkg/models"
 
 	"gorm.io/gorm"
@@ -57,8 +58,12 @@ func (r workshopRepository) ProcessMessage(message []byte) {
 	}
 }
 func (r workshopRepository) CreateMachine(data RawData) (RawData, error) {
+	data.CreatedAt = time.Now()
 	err := r.db.Create(&data).Error
-	return data, err
+	if err != nil {
+		return RawData{}, err
+	}
+	return data, nil
 }
 func (r workshopRepository) GetMachines(paginate models.Paginate) ([]RawData, error) {
 	var machines []RawData
