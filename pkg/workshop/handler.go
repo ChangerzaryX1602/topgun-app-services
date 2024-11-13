@@ -1,6 +1,7 @@
 package workshop
 
 import (
+	"strconv"
 	"top-gun-app-services/internal/handlers"
 	"top-gun-app-services/pkg/models"
 
@@ -110,6 +111,18 @@ func (h *workshopHandler) GetMachine() fiber.Handler {
 func (h *workshopHandler) UpdateMachine() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		id := c.Params("id")
+		idString, err := strconv.Atoi(id)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(helpers.ResponseForm{
+				Errors: []helpers.ResponseError{
+					{
+						Code:    fiber.StatusInternalServerError,
+						Message: err.Error(),
+						Source:  helpers.WhereAmI(),
+					},
+				},
+			})
+		}
 		var data RawData
 		if err := c.BodyParser(&data); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(helpers.ResponseForm{
@@ -134,6 +147,7 @@ func (h *workshopHandler) UpdateMachine() fiber.Handler {
 				},
 			})
 		}
+		machine.ID = idString
 		return c.Status(fiber.StatusOK).JSON(helpers.ResponseForm{
 			Success: true,
 			Data:    machine,
@@ -155,6 +169,9 @@ func (h *workshopHandler) DeleteMachine() fiber.Handler {
 				},
 			})
 		}
-		return c.Status(fiber.StatusNoContent).JSON(nil)
+		return c.Status(fiber.StatusNoContent).JSON(helpers.ResponseForm{
+			Success:  true,
+			Messages: []string{"Machine deleted successfully"},
+		})
 	}
 }
