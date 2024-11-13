@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"time"
 	"top-gun-app-services/pkg/models"
@@ -53,9 +54,9 @@ func (r workshopRepository) ProcessMessage(message []byte) {
 	// Save to database
 	err = r.db.Create(&machine).Error
 	if err != nil {
-		log.Printf("Error saving data to database: %v", err)
+		fmt.Println("cannot write data into db", machine)
 	} else {
-		log.Printf("Saved machine data to DB: %+v", machine)
+		fmt.Println("write to db data:", machine)
 	}
 }
 func (r workshopRepository) CreateMachine(data RawData) (RawData, error) {
