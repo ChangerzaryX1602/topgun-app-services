@@ -1,6 +1,7 @@
 package workshop
 
 import (
+	"top-gun-app-services/internal/handlers"
 	"top-gun-app-services/pkg/models"
 
 	"github.com/gofiber/fiber/v2"
@@ -9,16 +10,17 @@ import (
 
 type workshopHandler struct {
 	service WorkshopService
+	auth    *handlers.RouterResources
 }
 
-func NewWorkshopHandler(route fiber.Router, service WorkshopService) {
-	handler := &workshopHandler{service}
+func NewWorkshopHandler(route fiber.Router, service WorkshopService, router *handlers.RouterResources) {
+	handler := &workshopHandler{service: service, auth: router}
 	//CRUD
-	route.Post("/", handler.CreateMachine())
-	route.Get("/", handler.GetMachines())
-	route.Get("/:id", handler.GetMachine())
-	route.Put("/:id", handler.UpdateMachine())
-	route.Delete("/:id", handler.DeleteMachine())
+	route.Post("/", handler.auth.ReqAuthHandler(0), handler.CreateMachine())
+	route.Get("/", handler.auth.ReqAuthHandler(0), handler.GetMachines())
+	route.Get("/:id", handler.auth.ReqAuthHandler(0), handler.GetMachine())
+	route.Put("/:id", handler.auth.ReqAuthHandler(0), handler.UpdateMachine())
+	route.Delete("/:id", handler.auth.ReqAuthHandler(0), handler.DeleteMachine())
 }
 func (h *workshopHandler) CreateMachine() fiber.Handler {
 	return func(c *fiber.Ctx) error {
