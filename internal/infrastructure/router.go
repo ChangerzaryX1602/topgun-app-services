@@ -49,6 +49,7 @@ func (s *Server) SetupRoutes(app *fiber.App) {
 	mqtt.NewMQttHandler(app.Group("/api/v1/mqtt"), mqttUsecase, s.Mqtt, s.MqttOption)
 	workshop.NewWorkshopHandler(app.Group("/api/v1/machine"), workshopUsecase, router)
 	attachment.NewWorkshopHandler(app.Group("/api/v1/attachment"), attachmentUsecase, mqttUsecase, router)
+	
 	// Prepare a fallback route to always serve the 'index.html', had there not be any matching routes.
 	app.Static("*", "./web/build/index.html")
 }

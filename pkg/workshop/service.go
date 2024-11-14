@@ -42,7 +42,7 @@ func (s workshopService) ConnectWebSocket(wsURL string, apiKey string) {
 func (s workshopService) CreateMachine(data RawData) (RawData, error) {
 	return s.repo.CreateMachine(data)
 }
-func (s workshopService) GetMachines(paginate models.Paginate) ([]RawData, error) {
+func (s workshopService) GetMachines(paginate models.DatePicker) ([]RawData, error) {
 	return s.repo.GetMachines(paginate)
 }
 func (s workshopService) GetMachine(id string) (RawData, error) {

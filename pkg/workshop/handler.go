@@ -57,7 +57,7 @@ func (h *workshopHandler) CreateMachine() fiber.Handler {
 }
 func (h *workshopHandler) GetMachines() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		paginate := models.Paginate{}
+		paginate := models.DatePicker{}
 		if err := c.QueryParser(&paginate); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(helpers.ResponseForm{
 				Errors: []helpers.ResponseError{

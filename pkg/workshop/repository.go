@@ -67,9 +67,9 @@ func (r workshopRepository) CreateMachine(data RawData) (RawData, error) {
 	}
 	return data, nil
 }
-func (r workshopRepository) GetMachines(paginate models.Paginate) ([]RawData, error) {
+func (r workshopRepository) GetMachines(paginate models.DatePicker) ([]RawData, error) {
 	var machines []RawData
-	err := r.db.Preload(clause.Associations).Limit(paginate.Limit).Offset(paginate.Offset).Find(&machines).Error
+	err := r.db.Model(RawData{}).Preload(clause.Associations).Where("created_at BETWEEN ? AND ?", paginate.From, paginate.To).Find(&machines).Error
 	if err != nil {
 		return nil, err
 	}
