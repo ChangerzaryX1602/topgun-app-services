@@ -117,7 +117,7 @@ func (h *AuthHandler) Login() fiber.Handler {
 		claims := token.Claims.(*jwt.RegisteredClaims)
 		claims.Subject = response.UUID.String()
 		claims.Issuer = c.Hostname()
-		claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Minute * 1))
+		//claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Minute * 1))
 		signToken, err := token.SignedString(h.jwt.JwtSignKey)
 		if err != nil {
 			responseForm.Errors = []helpers.ResponseError{

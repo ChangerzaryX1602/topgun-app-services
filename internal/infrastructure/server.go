@@ -70,13 +70,13 @@ func NewServer(version, buildTag, runEnv string) (server *Server, err error) {
 	//if err != nil {
 	//	return
 	//}
-	// mqtt, mqttOption, err := datasources.MqttConnect(viper.GetString("mqtt.broker"), viper.GetString("mqtt.client_id"))
-	// if err != nil {
-	// 	return
-	// }
+	mqtt, mqttOption, err := datasources.MqttConnect(viper.GetString("mqtt.broker"), viper.GetString("mqtt.client_id"))
+	if err != nil {
+		return
+	}
 	// init app resources
 	// server.Resources = NewResources(fastHTTPClient, mainDbConn, nil, server.RedisStorage, jwtResources, minio)
-	server.Resources = NewResources(fastHTTPClient, mainDbConn, nil, nil, jwtResources, nil, nil, nil)
+	server.Resources = NewResources(fastHTTPClient, mainDbConn, nil, nil, jwtResources, nil, mqtt, mqttOption)
 	// something that use resources place here
 
 	// pre config server

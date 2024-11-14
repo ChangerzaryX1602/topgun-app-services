@@ -1,0 +1,290 @@
+definitions:
+  auth.LoginBody:
+    properties:
+      id:
+        type: string
+      identifier:
+        type: string
+      password:
+        type: string
+    type: object
+  prediction.Prediction:
+    properties:
+      id:
+        type: integer
+      result:
+        type: string
+      timeStamp:
+        type: string
+    type: object
+  user.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      language:
+        type: string
+      name_en:
+        type: string
+      password:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/attachment/:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Get File data
+      tags:
+      - Integration
+  /api/v1/attachment/{id}:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Get File data
+      tags:
+      - Integration
+  /api/v1/attachment/file:
+    post:
+      consumes:
+      - application/json
+      description: file_type has two values model or sound
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: File Type
+        in: formData
+        name: file_type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Send Attachment
+      tags:
+      - Integration
+  /api/v1/attachment/file/{attach_id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Attach ID
+        in: path
+        name: attach_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Get Attachment
+      tags:
+      - Integration
+  /api/v1/auth/:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginBody'
+      produces:
+      - application/json
+      responses: {}
+      summary: Login
+      tags:
+      - Auth
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.User'
+      produces:
+      - application/json
+      responses: {}
+      summary: Register
+      tags:
+      - Auth
+  /api/v1/users/:
+    get:
+      consumes:
+      - application/json
+      description: Get All Users
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Get All Users
+      tags:
+      - User
+  /api/v1/users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete User
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Delete User
+      tags:
+      - User
+    get:
+      consumes:
+      - application/json
+      description: Get User
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Get User
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: Update User
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User Data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user.User'
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Update User
+      tags:
+      - User
+  /api/v1/users/me:
+    get:
+      consumes:
+      - application/json
+      description: Get Me
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Get Me
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: Update Me
+      parameters:
+      - description: User Data
+        in: body
+        name: user
+        schema:
+          $ref: '#/definitions/user.User'
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Update Me
+      tags:
+      - User
+  /api/v1/users/search:
+    get:
+      consumes:
+      - application/json
+      description: Search User
+      parameters:
+      - description: Keyword
+        in: query
+        name: keyword
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Search User
+      tags:
+      - User
+  /prediction/:
+    post:
+      consumes:
+      - application/json
+      description: Create Prediction
+      parameters:
+      - description: Prediction
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/prediction.Prediction'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/prediction.Prediction'
+      security:
+      - ApiKeyAuth: []
+      summary: Create Prediction
+      tags:
+      - Integration
+swagger: "2.0"

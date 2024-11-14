@@ -5,12 +5,17 @@ import (
 	"log"
 
 	"top-gun-app-services/internal/handlers"
+	"top-gun-app-services/pkg/attachment"
 	"top-gun-app-services/pkg/auth"
 	"top-gun-app-services/pkg/mqtt"
 	"top-gun-app-services/pkg/user"
 	"top-gun-app-services/pkg/workshop"
 
+	//swagger
+	_ "top-gun-app-services/docs"
+
 	"github.com/gofiber/fiber/v2"
+	fiberSwagger "github.com/swaggo/fiber-swagger"
 	"gorm.io/gorm"
 )
 
@@ -24,24 +29,26 @@ func (s *Server) SetupRoutes(app *fiber.App) {
 	{
 		groupApiV1.Get("/", handlers.Index())
 	}
+	//swagger path
+	app.Get("/api/v1/swagger/*", fiberSwagger.WrapHandler)
 	router := handlers.NewRouterResources(s.JwtResources.JwtKeyfunc)
 	// App
 	userRepository := user.NewUserRepository(s.MainDbConn)
 	authRepository := auth.NewAuthRepository(s.MainDbConn)
 	mqttRepository := mqtt.NewMQTTRepository(s.MainDbConn)
 	workshopRepository := workshop.NewWorkshopRepository(s.MainDbConn)
-	checkAndAutoMigrate(s.MainDbConn, &user.User{}, &workshop.RawData{})
+	attachmentRepository := attachment.NewAttachmentRepository(s.MainDbConn)
+	checkAndAutoMigrate(s.MainDbConn, &user.User{}, &workshop.RawData{}, &attachment.AttachFile{})
 	userUsecase := user.NewUserService(userRepository)
 	authUsecase := auth.NewAuthService(authRepository)
 	mqttUsecase := mqtt.NewMQttService(mqttRepository)
 	workshopUsecase := workshop.NewWorkshopService(workshopRepository)
+	attachmentUsecase := attachment.NewAttachmentService(attachmentRepository)
 	user.NewUserHandler(app.Group("/api/v1/users"), userUsecase, router)
 	auth.NewAuthHandler(app.Group("/api/v1/auth"), authUsecase, *s.JwtResources, router)
 	mqtt.NewMQttHandler(app.Group("/api/v1/mqtt"), mqttUsecase, s.Mqtt, s.MqttOption)
 	workshop.NewWorkshopHandler(app.Group("/api/v1/machine"), workshopUsecase, router)
-	// wsURL := viper.GetString("workshop.ws")
-	// apiKey := viper.GetString("workshop.key")
-	// workshopUsecase.ConnectWebSocket(wsURL, apiKey)
+	attachment.NewWorkshopHandler(app.Group("/api/v1/attachment"), attachmentUsecase, router)
 	// Prepare a fallback route to always serve the 'index.html', had there not be any matching routes.
 	app.Static("*", "./web/build/index.html")
 }
