@@ -188,7 +188,7 @@ func (h *attachmentHandler) CreateAttachment() fiber.Handler {
 				Errors: []helpers.ResponseError{
 					{
 						Code:    fiber.StatusInternalServerError,
-						Message: "Unable to save file",
+						Message: "Unable to save file:" + err.Error(),
 						Source:  helpers.WhereAmI(),
 					},
 				},
