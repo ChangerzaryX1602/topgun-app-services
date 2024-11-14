@@ -16,7 +16,7 @@ func NewAttachmentRepository(db *gorm.DB) AttachmentRepository {
 }
 func (r attachmentRepository) GetDatas(paginate models.Paginate) ([]AttachFile, error) {
 	var attach []AttachFile
-	err := r.db.Limit(paginate.Limit).Offset(paginate.Offset).Find(&attach).Error
+	err := r.db.Limit(paginate.Limit).Offset(paginate.Offset).Order("created_at DESC").Find(&attach).Error
 	if err != nil {
 		return []AttachFile{}, err
 	}
