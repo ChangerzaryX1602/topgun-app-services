@@ -10,7 +10,7 @@ func NewAttachmentService(repo AttachmentRepository) AttachmentService {
 	return &attachmentService{repo}
 }
 
-func (s attachmentService) CreateFile(attach AttachFile) error {
+func (s attachmentService) CreateFile(attach AttachFile) (AttachFile, error) {
 	return s.repo.CreateFile(attach)
 }
 func (s attachmentService) GetFile(id int) (AttachFile, error) {

@@ -1,6 +1,8 @@
 package infrastructure
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"os"
@@ -31,6 +33,13 @@ type Server struct {
 	PrdMode bool
 }
 
+func generateRandomClientID(length int) (string, error) {
+	bytes := make([]byte, length)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(bytes), nil
+}
 func NewServer(version, buildTag, runEnv string) (server *Server, err error) {
 	// Init server
 	server = &Server{
@@ -70,7 +79,13 @@ func NewServer(version, buildTag, runEnv string) (server *Server, err error) {
 	//if err != nil {
 	//	return
 	//}
-	mqtt, mqttOption, err := datasources.MqttConnect(viper.GetString("mqtt.broker"), viper.GetString("mqtt.client_id"))
+
+	//generate mqtt client
+	client, err := generateRandomClientID(16)
+	if err != nil {
+		return
+	}
+	mqtt, mqttOption, err := datasources.MqttConnect(viper.GetString("mqtt.broker"), client)
 	if err != nil {
 		return
 	}

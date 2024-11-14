@@ -41,14 +41,14 @@ func (s *Server) SetupRoutes(app *fiber.App) {
 	checkAndAutoMigrate(s.MainDbConn, &user.User{}, &workshop.RawData{}, &attachment.AttachFile{})
 	userUsecase := user.NewUserService(userRepository)
 	authUsecase := auth.NewAuthService(authRepository)
-	mqttUsecase := mqtt.NewMQttService(mqttRepository)
+	mqttUsecase := mqtt.NewMQttService(mqttRepository, s.Mqtt, s.MqttOption)
 	workshopUsecase := workshop.NewWorkshopService(workshopRepository)
 	attachmentUsecase := attachment.NewAttachmentService(attachmentRepository)
 	user.NewUserHandler(app.Group("/api/v1/users"), userUsecase, router)
 	auth.NewAuthHandler(app.Group("/api/v1/auth"), authUsecase, *s.JwtResources, router)
 	mqtt.NewMQttHandler(app.Group("/api/v1/mqtt"), mqttUsecase, s.Mqtt, s.MqttOption)
 	workshop.NewWorkshopHandler(app.Group("/api/v1/machine"), workshopUsecase, router)
-	attachment.NewWorkshopHandler(app.Group("/api/v1/attachment"), attachmentUsecase, router)
+	attachment.NewWorkshopHandler(app.Group("/api/v1/attachment"), attachmentUsecase, mqttUsecase, router)
 	// Prepare a fallback route to always serve the 'index.html', had there not be any matching routes.
 	app.Static("*", "./web/build/index.html")
 }

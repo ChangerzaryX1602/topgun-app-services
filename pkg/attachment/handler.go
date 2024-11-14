@@ -7,6 +7,7 @@ import (
 	"time"
 	"top-gun-app-services/internal/handlers"
 	"top-gun-app-services/pkg/models"
+	"top-gun-app-services/pkg/mqtt"
 
 	"github.com/gofiber/fiber/v2"
 	helpers "github.com/zercle/gofiber-helpers"
@@ -14,11 +15,12 @@ import (
 
 type attachmentHandler struct {
 	service AttachmentService
+	mqtt    mqtt.MqttService
 	auth    *handlers.RouterResources
 }
 
-func NewWorkshopHandler(route fiber.Router, service AttachmentService, router *handlers.RouterResources) {
-	handler := &attachmentHandler{service: service, auth: router}
+func NewWorkshopHandler(route fiber.Router, service AttachmentService, mqtt mqtt.MqttService, router *handlers.RouterResources) {
+	handler := &attachmentHandler{service: service, mqtt: mqtt, auth: router}
 	//CRUD
 	route.Post("/file", handler.auth.ReqAuthHandler(0), handler.CreateAttachment())
 	route.Get("/file/:attach_id", handler.auth.ReqAuthHandler(0), handler.GetAttachment())
@@ -147,10 +149,13 @@ func (h *attachmentHandler) CreateAttachment() fiber.Handler {
 		//save file
 		// Define the upload directory
 		var uploadDir string
+		var topic string
 		if fileType == "model" {
 			uploadDir = "./upload/model"
+			topic = "topgun/hw_trigger"
 		} else if fileType == "sound" {
 			uploadDir = "./upload/sound"
+			topic = "topgun/ml_trigger"
 		} else {
 			return c.Status(fiber.StatusBadRequest).JSON(helpers.ResponseForm{
 				Errors: []helpers.ResponseError{
@@ -196,7 +201,19 @@ func (h *attachmentHandler) CreateAttachment() fiber.Handler {
 			FileType:  fileType,
 			CreatedAt: time.Now(),
 		}
-		err = h.service.CreateFile(attachFile)
+		attach, err := h.service.CreateFile(attachFile)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(helpers.ResponseForm{
+				Errors: []helpers.ResponseError{
+					{
+						Code:    fiber.StatusInternalServerError,
+						Message: err.Error(),
+						Source:  helpers.WhereAmI(),
+					},
+				},
+			})
+		}
+		err = h.mqtt.PublishMessage(topic, []byte(strconv.Itoa(attach.ID)))
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(helpers.ResponseForm{
 				Errors: []helpers.ResponseError{
@@ -210,7 +227,7 @@ func (h *attachmentHandler) CreateAttachment() fiber.Handler {
 		}
 		return c.Status(fiber.StatusCreated).JSON(helpers.ResponseForm{
 			Success:  true,
-			Messages: []string{"File uploaded successfully"},
+			Messages: []string{"File uploaded successfully" + strconv.Itoa(attach.ID)},
 		})
 	}
 }

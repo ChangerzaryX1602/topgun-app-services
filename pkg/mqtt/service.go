@@ -9,10 +9,12 @@ import (
 
 type mqttService struct {
 	mqttRepository MqttRepository
+	mqtt           mqtt.Client
+	mqttOption     *mqtt.ClientOptions
 }
 
-func NewMQttService(mqttRepository MqttRepository) MqttService {
-	return &mqttService{mqttRepository: mqttRepository}
+func NewMQttService(mqttRepository MqttRepository, mqtt mqtt.Client, mqttOption *mqtt.ClientOptions) MqttService {
+	return &mqttService{mqttRepository: mqttRepository, mqtt: mqtt, mqttOption: mqttOption}
 }
 func (s mqttService) MessagePubHandler(client mqtt.Client, msg mqtt.Message) {
 	mqttRequest := MQTT{
@@ -25,4 +27,12 @@ func (s mqttService) MessagePubHandler(client mqtt.Client, msg mqtt.Message) {
 		fmt.Printf("Error creating message: %v\n", err)
 	}
 	fmt.Println("Message created: ", message)
+}
+func (s mqttService) PublishMessage(topic string, message []byte) error {
+	token := s.mqtt.Publish(topic, 0, false, message)
+	token.Wait()
+	if token.Error() != nil {
+		return token.Error()
+	}
+	return nil
 }

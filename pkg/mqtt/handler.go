@@ -56,14 +56,13 @@ func (h mqttHandler) PostMqtt() fiber.Handler {
 				},
 			})
 		}
-		token := h.mqtt.Publish(req.Topic, 0, false, payload)
-		token.Wait()
-		if token.Error() != nil {
+		err = h.mqttService.PublishMessage(req.Topic, payload)
+		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(helpers.ResponseForm{
 				Errors: []helpers.ResponseError{
 					{
 						Code:    fiber.StatusInternalServerError,
-						Message: token.Error().Error(),
+						Message: err.Error(),
 						Source:  helpers.WhereAmI(),
 					},
 				},

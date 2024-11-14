@@ -4,6 +4,7 @@ import (
 	"top-gun-app-services/pkg/models"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type attachmentRepository struct {
@@ -29,12 +30,12 @@ func (r attachmentRepository) GetData(id int) (AttachFile, error) {
 	}
 	return attach, nil
 }
-func (r attachmentRepository) CreateFile(attach AttachFile) error {
-	err := r.db.Create(&attach)
-	if err != nil {
-		return err.Error
+func (r attachmentRepository) CreateFile(attach AttachFile) (AttachFile, error) {
+	err := r.db.Preload(clause.Associations).Create(&attach)
+	if err.Error != nil {
+		return AttachFile{}, err.Error
 	}
-	return nil
+	return attach, nil
 }
 func (r attachmentRepository) GetFile(id int) (AttachFile, error) {
 	var attach AttachFile
