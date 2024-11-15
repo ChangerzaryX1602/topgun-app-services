@@ -7,5 +7,6 @@ type MqttService interface {
 	PublishMessage(topic string, message []byte) error
 }
 type MqttRepository interface {
-	CreateMessage(MQTT) (MQTT, error)
+	CreateVoice(VoiceData) (VoiceData, error)
+	CreatePredict(PredictData) (PredictData, error)
 }

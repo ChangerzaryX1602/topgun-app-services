@@ -38,7 +38,7 @@ func (s *Server) SetupRoutes(app *fiber.App) {
 	mqttRepository := mqtt.NewMQTTRepository(s.MainDbConn)
 	workshopRepository := workshop.NewWorkshopRepository(s.MainDbConn)
 	attachmentRepository := attachment.NewAttachmentRepository(s.MainDbConn)
-	checkAndAutoMigrate(s.MainDbConn, &user.User{}, &workshop.RawData{}, &attachment.AttachFile{}, &mqtt.MQTT{})
+	checkAndAutoMigrate(s.MainDbConn, &user.User{}, &workshop.RawData{}, &attachment.AttachFile{}, &mqtt.PredictData{}, &mqtt.VoiceData{})
 	userUsecase := user.NewUserService(userRepository)
 	authUsecase := auth.NewAuthService(authRepository)
 	mqttUsecase := mqtt.NewMQttService(mqttRepository, s.Mqtt, s.MqttOption)
