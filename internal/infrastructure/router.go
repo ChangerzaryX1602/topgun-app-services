@@ -38,7 +38,7 @@ func (s *Server) SetupRoutes(app *fiber.App) {
 	mqttRepository := mqtt.NewMQTTRepository(s.MainDbConn)
 	workshopRepository := workshop.NewWorkshopRepository(s.MainDbConn)
 	attachmentRepository := attachment.NewAttachmentRepository(s.MainDbConn)
-	checkAndAutoMigrate(s.MainDbConn, &user.User{}, &workshop.RawData{}, &attachment.AttachFile{})
+	checkAndAutoMigrate(s.MainDbConn, &user.User{}, &workshop.RawData{}, &attachment.AttachFile{}, &mqtt.MQTT{})
 	userUsecase := user.NewUserService(userRepository)
 	authUsecase := auth.NewAuthService(authRepository)
 	mqttUsecase := mqtt.NewMQttService(mqttRepository, s.Mqtt, s.MqttOption)
@@ -49,6 +49,7 @@ func (s *Server) SetupRoutes(app *fiber.App) {
 	mqtt.NewMQttHandler(app.Group("/api/v1/mqtt"), mqttUsecase, s.Mqtt, s.MqttOption)
 	workshop.NewWorkshopHandler(app.Group("/api/v1/machine"), workshopUsecase, router)
 	attachment.NewWorkshopHandler(app.Group("/api/v1/attachment"), attachmentUsecase, mqttUsecase, router)
+	mqtt.NewMQttHandler(app.Group("/api/v1/mqtt"), mqttUsecase, s.Mqtt, s.MqttOption)
 	// workshopUsecase.ConnectWebSocket(viper.GetString("workshop.ws"), viper.GetString("workshop.key"))
 	// Prepare a fallback route to always serve the 'index.html', had there not be any matching routes.
 	app.Static("*", "./web/build/index.html")

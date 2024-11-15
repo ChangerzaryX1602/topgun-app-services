@@ -14,7 +14,6 @@ func MqttConnect(broker string, clientID string) (mqtt.Client, *mqtt.ClientOptio
 	opts.Username = viper.GetString("mqtt.username")
 	opts.Password = viper.GetString("mqtt.password")
 	opts.OnConnect = func(client mqtt.Client) {
-		fmt.Println("Connected to MQTT broker")
 		if token := client.Subscribe("arduino/temperature", 0, nil); token.Wait() && token.Error() != nil {
 			fmt.Println(token.Error())
 		}
@@ -24,5 +23,6 @@ func MqttConnect(broker string, clientID string) (mqtt.Client, *mqtt.ClientOptio
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		return nil, nil, token.Error()
 	}
+	fmt.Println("Connected to MQTT broker")
 	return client, opts, nil
 }

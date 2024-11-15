@@ -49,7 +49,7 @@ minio:
   access_key: ""
   secret_key: ""
 mqtt:
-  broker: "ws://185.84.161.188:9001/mqtt"
+  broker: "mqtt://185.84.161.188:1884"
   client_id: "mqttx_be33d6c6"
   username: "changerzaryx"
   password: "cn16022547"

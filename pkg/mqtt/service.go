@@ -1,6 +1,7 @@
 package mqtt
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -17,8 +18,14 @@ func NewMQttService(mqttRepository MqttRepository, mqtt mqtt.Client, mqttOption 
 	return &mqttService{mqttRepository: mqttRepository, mqtt: mqtt, mqttOption: mqttOption}
 }
 func (s mqttService) MessagePubHandler(client mqtt.Client, msg mqtt.Message) {
+	var predict Predict
+	err := json.Unmarshal(msg.Payload(), &predict)
+	if err != nil {
+		fmt.Printf("Error unmarshalling message: %v\n", err)
+		return
+	}
 	mqttRequest := MQTT{
-		Message:   string(msg.Payload()),
+		Message:   predict,
 		Topic:     msg.Topic(),
 		CreatedAt: time.Now(),
 	}

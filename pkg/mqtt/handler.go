@@ -21,7 +21,8 @@ func NewMQttHandler(router fiber.Router, mqttService MqttService, mqtt mqtt.Clie
 	mqttHandler.MqttSubscibeHandler(mqtt, mqttOption)
 }
 func (h mqttHandler) MqttSubscibeHandler(mqtt mqtt.Client, mqttOption *mqtt.ClientOptions) {
-	if token := mqtt.Subscribe("test/test", 0, h.mqttService.MessagePubHandler); token.Wait() && token.Error() != nil {
+	fmt.Println("Subscribing to topic")
+	if token := mqtt.Subscribe("topgun/data", 0, h.mqttService.MessagePubHandler); token.Wait() && token.Error() != nil {
 		fmt.Printf("Error subscribing to topic: %v\n", token.Error())
 	}
 }
