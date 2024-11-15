@@ -1,6 +1,7 @@
 package attachment
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -152,10 +153,10 @@ func (h *attachmentHandler) CreateAttachment() fiber.Handler {
 		var topic string
 		if fileType == "model" {
 			uploadDir = "./upload/model"
-			topic = "topgun/hw_trigger"
+			topic = "topgun/project"
 		} else if fileType == "sound" {
 			uploadDir = "./upload/sound"
-			topic = "topgun/ml_trigger"
+			topic = "topgun/project"
 		} else {
 			return c.Status(fiber.StatusBadRequest).JSON(helpers.ResponseForm{
 				Errors: []helpers.ResponseError{
@@ -213,7 +214,19 @@ func (h *attachmentHandler) CreateAttachment() fiber.Handler {
 				},
 			})
 		}
-		err = h.mqtt.PublishMessage(topic, []byte(strconv.Itoa(attach.ID)))
+		message, err := json.Marshal(map[string]interface{}{"file_id": attach.ID})
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(helpers.ResponseForm{
+				Errors: []helpers.ResponseError{
+					{
+						Code:    fiber.StatusInternalServerError,
+						Message: "Unable to marshal message: " + err.Error(),
+						Source:  helpers.WhereAmI(),
+					},
+				},
+			})
+		}
+		err = h.mqtt.PublishMessage(topic, message)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(helpers.ResponseForm{
 				Errors: []helpers.ResponseError{
