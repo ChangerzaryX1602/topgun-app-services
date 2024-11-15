@@ -214,7 +214,7 @@ func (h *attachmentHandler) CreateAttachment() fiber.Handler {
 				},
 			})
 		}
-		message, err := json.Marshal(map[string]interface{}{"file_id": attach.ID})
+		message, err := json.Marshal("id" + strconv.Itoa(attach.ID))
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(helpers.ResponseForm{
 				Errors: []helpers.ResponseError{
